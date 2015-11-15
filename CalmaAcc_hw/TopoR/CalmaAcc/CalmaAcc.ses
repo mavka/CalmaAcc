@@ -1,0 +1,103 @@
+(session Z:\git\CalmaAcc\CalmaAcc_hw\TopoR\CalmaAcc\CalmaAcc.ses
+   (placement 
+      (resolution mm 100000)
+      (component "Batteries_kl:BAT_CH7410"
+         (place "B1" 13585710 -8768310 back 180)
+      )
+      (component "Capacitors:CAP_0402"
+         (place "C1" 12650840 -8537080 front 180)
+         (place "C2" 12644840 -8922080 front 180)
+         (place "C3" 12947840 -9147080 front 270)
+         (place "C4" 13517710 -8481930 front 180)
+         (place "C5" 13518710 -8315930 front 180)
+         (place "C6" 14423870 -8872470 front 0)
+         (place "C7" 14420870 -8717470 front 0)
+         (place "C8" 14420870 -8558470 front 0)
+         (place "R1" 13172840 -9163080 front 270)
+         (place "R2" 13420840 -8913080 front 0)
+         (place "R3" 15004450 -8187080 front 0)
+         (place "R4" 14226700 -8275450 front 0)
+         (place "R5" 12918010 -8204210 front 0)
+         (place "R6" 13807270 -9347720 front 0)
+      )
+      (component "Capacitors:CAP_0805"
+         (place "C9" 15424450 -8844840 front 0)
+         (place "C10" 15398170 -8577000 front 0)
+      )
+      (component "LEDs:LED_0603"
+         (place "D1" 14974820 -8021830 front 180)
+         (place "D3" 12946010 -8021840 front 0)
+         (place "D4" 13803900 -9523340 front 0)
+      )
+      (component "Diodes:SOD323"
+         (place "D2" 14186220 -8058540 front 0)
+      )
+      (component "QFN_DFN:QFN16_5_3"
+         (place "DD1" 13025840 -8721080 front 0)
+      )
+      (component "QFN_DFN:UFQFPN28"
+         (place "DD2" 13971950 -8686030 front 180)
+      )
+      (component "SOT:SOT23-3"
+         (place "Q1" 14583300 -8267630 front 0)
+      )
+      (component "Connectors:PLS-2"
+         (place "XL3" 14989000 -9435700 front 90)
+      )
+      (component "Connectors:PLS-3-PAD"
+         (place "XL4" 14125070 -9518320 front 0)
+      )
+      (component "Connectors:PLS-4-PAD"
+         (place "XL1" 12872260 -9509770 front 0)
+      )
+   )
+   (routes
+      (resolution mm 100000)
+      (library_out
+         (padstack "Via[0-1]_600:400_um"
+            (shape (circ "F.Cu" 60000 0 0))
+            (shape (circ "B.Cu" 60000 0 0))
+         )
+      )
+      (network_out
+         (net "+BATT"
+         )
+         (net "GND"
+         )
+         (net "Net-(C3-Pad1)"
+         )
+         (net "/I2C_SCL"
+         )
+         (net "/I2C_SDA"
+         )
+         (net "Net-(DD2-Pad14)"
+         )
+         (net "Net-(D1-PadA)"
+         )
+         (net "Net-(Q1-Pad1)"
+         )
+         (net "/Vibro"
+         )
+         (net "Net-(D3-PadA)"
+         )
+         (net "Net-(DD2-Pad12)"
+         )
+         (net "Net-(D4-PadA)"
+         )
+         (net "Net-(DD2-Pad13)"
+         )
+         (net "Net-(D2-PadA)"
+         )
+         (net "/ACC_INT1"
+         )
+         (net "/UART_TX"
+         )
+         (net "/UART_RX"
+         )
+         (net "/SWDIO"
+         )
+         (net "/SWCLK"
+         )
+      )
+   )
+)

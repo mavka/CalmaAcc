@@ -2,3 +2,7 @@
 *.bak
 
 cases/Part1.SLDPRT
+
+CalmaAcc_hw/CalmaAcc.kicad_pcb-bak
+
+CalmaAcc_hw/TopoR/CalmaAcc/.CalmaAcc.fsxview
