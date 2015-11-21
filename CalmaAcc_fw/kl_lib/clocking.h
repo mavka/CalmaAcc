@@ -8,8 +8,8 @@
 #ifndef CLOCKING_H_
 #define CLOCKING_H_
 
-#include "mcuconf.h"
-#include "ch.h"
+#include "board.h"
+#include "stm32_registry.h"
 
 #if defined STM32L1XX_MD
 
@@ -30,7 +30,6 @@
  * APB2 freq max = 32 MHz;
  */
 
-#define CRYSTAL_FREQ_HZ     8000000     // Freq of external crystal, change accordingly
 #define HSI_FREQ_HZ         HSI_VALUE   // Freq of internal generator, not adjustable
 #define LSI_FREQ_HZ         37000       // Freq of internal generator, not adjustable
 
@@ -114,7 +113,7 @@ enum VCore_t {vcore1V2=0b11, vcore1V5=0b10, vcore1V8=0b01};
 extern VCore_t VCore;
 void SetupVCore(VCore_t AVCore);
 
-#elif defined STM32F030
+#elif defined STM32F0XX
 #include "stm32f0xx.h"
 
 /*
@@ -134,9 +133,9 @@ void SetupVCore(VCore_t AVCore);
  * APB  freq max = 48 MHz;
  */
 
-#define CRYSTAL_FREQ_HZ     8000000     // Freq of external crystal, change accordingly
+#define HSI_FREQ_HZ     8000000 // Freq of internal generator, not adjustable
+#define HSI48_FREQ_HZ   48000000
 
-enum ClkSrc_t {csHSI=0b00, csHSE=0b01, csPLL=0b10};
 enum PllMul_t {
     pllMul2=0,
     pllMul3=1,
@@ -155,7 +154,10 @@ enum PllMul_t {
     pllMul16=14
 };
 
-enum PllSrc_t {plsHSIdiv2=0b00, plsHSI=0b01, plsHSE=0b10};
+#ifdef STM32F042x6
+enum PllSrc_t {plsHSIdiv2=0b00, plsHSIdivPREDIV=0b01, plsHSEdivPREDIV=0b10, plsHSI48divPREDIV=0b11};
+enum ClkSrc_t {csHSI=0b00, csHSE=0b01, csPLL=0b10, csHSI48=0b11};
+#endif
 
 enum AHBDiv_t {
     ahbDiv1=0b0000,
@@ -191,6 +193,10 @@ public:
     uint8_t SetupPLLDividers(uint8_t HsePreDiv, PllMul_t PllMul);
     void UpdateFreqValues();
     void SetupFlashLatency(uint32_t FrequencyHz);
+    void EnablePrefetch()  { FLASH->ACR |=  FLASH_ACR_PRFTBE; }
+    void DisablePrefetch() { FLASH->ACR &= ~FLASH_ACR_PRFTBE; }
+
+    void PrintFreqs();
 };
 
 extern Clk_t Clk;

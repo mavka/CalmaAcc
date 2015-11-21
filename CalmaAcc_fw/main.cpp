@@ -12,9 +12,8 @@ App_t App;
 int main(void) {
     // ==== Setup clock frequency ====
     uint8_t ClkResult = 1;
-    Clk.SetupFlashLatency(64);  // Setup Flash Latency for clock in MHz
-    Clk.EnablePrefetch();
-    Clk.SetupBusDividers(ahbDiv1, apbDiv1, apbDiv1);
+    Clk.SetupFlashLatency(8);  // Setup Flash Latency for clock in MHz
+    Clk.SetupBusDividers(ahbDiv1, apbDiv1);
     Clk.UpdateFreqValues();
 
     // Init OS

@@ -7,9 +7,12 @@
 
 #include "clocking.h"
 #include "stm32_rcc.h"
+#include "kl_lib.h"
 #include "uart.h"
 
 Clk_t Clk;
+
+#define CLK_STARTUP_TIMEOUT     2007
 
 #if defined STM32L1XX_MD
 // ==== Inner use ====
@@ -208,7 +211,7 @@ void SetupVCore(VCore_t AVCore) {
     VCore = AVCore;
 }
 
-#elif defined STM32F030
+#elif defined STM32F0XX
 // ==== Inner use ====
 uint8_t Clk_t::EnableHSE() {
     RCC->CR |= RCC_CR_HSEON;    // Enable HSE
@@ -217,7 +220,7 @@ uint8_t Clk_t::EnableHSE() {
     do {
         if(RCC->CR & RCC_CR_HSERDY) return 0;   // HSE is ready
         StartUpCounter++;
-    } while(StartUpCounter < HSE_STARTUP_TIMEOUT);
+    } while(StartUpCounter < CLK_STARTUP_TIMEOUT);
     return 1; // Timeout
 }
 
@@ -228,7 +231,7 @@ uint8_t Clk_t::EnableHSI() {
     do {
         if(RCC->CR & RCC_CR_HSIRDY) return 0;   // HSE is ready
         StartUpCounter++;
-    } while(StartUpCounter < HSI_STARTUP_TIMEOUT);
+    } while(StartUpCounter < CLK_STARTUP_TIMEOUT);
     return 1; // Timeout
 }
 
@@ -239,28 +242,40 @@ uint8_t Clk_t::EnablePLL() {
     do {
         if(RCC->CR & RCC_CR_PLLRDY) return 0;   // PLL is ready
         StartUpCounter++;
-    } while(StartUpCounter < HSE_STARTUP_TIMEOUT);
+    } while(StartUpCounter < CLK_STARTUP_TIMEOUT);
     return 1; // Timeout
 }
 
 void Clk_t::UpdateFreqValues() {
     uint32_t tmp, PllSrc, PreDiv, PllMul;
-    uint32_t SysClkHz = HSI_VALUE;
+    uint32_t SysClkHz = HSI_FREQ_HZ;
     // Figure out SysClk
     tmp = (RCC->CFGR & RCC_CFGR_SWS) >> 2;
     switch(tmp) {
-        case csHSI:   SysClkHz = HSI_VALUE; break;
+        case csHSI:   SysClkHz = HSI_FREQ_HZ; break;
         case csHSE:   SysClkHz = CRYSTAL_FREQ_HZ; break;
         case csPLL: // PLL used as system clock source
             // Get different PLL dividers
+#ifdef STM32F042x6
+            PreDiv = (RCC->CFGR2 & RCC_CFGR2_PREDIV) + 1;
+            PllMul = ((RCC->CFGR & RCC_CFGR_PLLMUL) >> 18) + 2;
+#else
             PreDiv = (RCC->CFGR2 & RCC_CFGR2_PREDIV1) + 1;
             PllMul = ((RCC->CFGR & RCC_CFGR_PLLMULL) >> 18) + 2;
+#endif
             if(PllMul > 16) PllMul = 16;
             // Which src is used as pll input?
             PllSrc = RCC->CFGR & RCC_CFGR_PLLSRC;
             switch(PllSrc) {
+#ifdef STM32F042x6
+                case RCC_CFGR_PLLSRC_HSI_DIV2:   SysClkHz = HSI_FREQ_HZ / 2; break;
+                case RCC_CFGR_PLLSRC_HSI_PREDIV: SysClkHz = HSI_FREQ_HZ / PreDiv; break;
+                case RCC_CFGR_PLLSRC_HSE_PREDIV: SysClkHz = CRYSTAL_FREQ_HZ / PreDiv; break;
+                case RCC_CFGR_PLLSRC_HSI48_PREDIV: SysClkHz = HSI48_FREQ_HZ / PreDiv; break;
+#else
                 case RCC_CFGR_PLLSRC_HSI_Div2: SysClkHz = HSI_VALUE / 2; break;
                 case RCC_CFGR_PLLSRC_PREDIV1: SysClkHz = CRYSTAL_FREQ_HZ / PreDiv; break;
+#endif
                 default: break;
             }
             SysClkHz *= PllMul;
@@ -291,24 +306,33 @@ void Clk_t::SetupBusDividers(AHBDiv_t AHBDiv, APBDiv_t APBDiv) {
 uint8_t Clk_t::SwitchTo(ClkSrc_t AClkSrc) {
     switch(AClkSrc) {
         case csHSI:
-            if(EnableHSI() != 0) return 1;
+            if(EnableHSI() != OK) return 1;
             RCC->CFGR &= ~RCC_CFGR_SW;      // }
             RCC->CFGR |=  RCC_CFGR_SW_HSI;  // } Select HSI as system clock src
             while((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_HSI); // Wait till ready
             break;
 
         case csHSE:
-            if(EnableHSE() != 0) return 2;
+            if(EnableHSE() != OK) return 2;
             RCC->CFGR &= ~RCC_CFGR_SW;      // }
             RCC->CFGR |=  RCC_CFGR_SW_HSE;  // } Select HSE as system clock src
             while((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_HSE); // Wait till ready
             break;
 
         case csPLL:
-            if(EnablePLL() != 0) return 3;
+            if(EnablePLL() != OK) return 3;
             RCC->CFGR &= ~RCC_CFGR_SW;          // }
             RCC->CFGR |=  RCC_CFGR_SW_PLL;      // } Select PLL as system clock src
             while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL); // Wait until ready
+            break;
+
+        case csHSI48:
+            if(EnableHSI48() != OK) return FAILURE;
+            else {
+                RCC->CFGR &= ~RCC_CFGR_SW;
+                RCC->CFGR |=  RCC_CFGR_SW_HSI48;
+                while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_HSI48); // Wait until ready
+            }
             break;
     } // switch
     return 0;
@@ -322,12 +346,20 @@ uint8_t Clk_t::SetupPLLDividers(uint8_t HsePreDiv, PllMul_t PllMul) {
     HsePreDiv--;
     if(HsePreDiv > 0x0F) HsePreDiv = 0x0F;
     uint32_t tmp = RCC->CFGR2;
+#ifdef STM32F042x6
+    tmp &= ~RCC_CFGR2_PREDIV;
+#else
     tmp &= ~RCC_CFGR2_PREDIV1;
+#endif
     tmp |= HsePreDiv;
     RCC->CFGR2 = tmp;
     // Setup PLL divider
     tmp = RCC->CFGR;
+#ifdef STM32F042x6
+    tmp &= ~RCC_CFGR_PLLMUL;
+#else
     tmp &= ~RCC_CFGR_PLLMULL;
+#endif
     tmp |= ((uint32_t)PllMul) << 18;
     RCC->CFGR = tmp;
     return 0;
@@ -340,6 +372,12 @@ void Clk_t::SetupFlashLatency(uint32_t FrequencyHz) {
     if(FrequencyHz <= 24000000) tmp &= ~FLASH_ACR_LATENCY;
     else tmp |= FLASH_ACR_LATENCY;
     FLASH->ACR = tmp;
+}
+
+void Clk_t::PrintFreqs() {
+    Uart.Printf(
+            "AHBFreq=%uMHz; APBFreq=%uMHz\r",
+            Clk.AHBFreqHz/1000000, Clk.APBFreqHz/1000000);
 }
 
 /*

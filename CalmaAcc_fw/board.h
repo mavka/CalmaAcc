@@ -10,43 +10,35 @@
 
 #include <inttypes.h>
 
-// General
+// ==== General ====
+#define BOARD_NAME          "AccCalma"
+// MCU type as defined in the ST header.
+#define STM32F042x6
+
 #define CRYSTAL_FREQ_HZ     12000000    // Freq of external crystal
 
 // USB
-#define USBDrv      	USBD1   // USB driver to use
+//#define USBDrv      	USBD1   // USB driver to use
 
 #if 1 // ========================== GPIO =======================================
 // UART
-#define UART_GPIO       GPIOB
-#define UART_TX_PIN     6
-#define UART_RX_PIN     7
-#define UART_AF         AF7
+#define UART_GPIO       GPIOA
+#define UART_TX_PIN     2
+#define UART_RX_PIN     3
+#define UART_AF         AF1
 
 // LEDs
-#define LED1_PIN        2
 #define LED1_GPIO       GPIOB
-#define LED2_PIN        11
-#define LED2_GPIO       GPIOB
-#define LED3_PIN        1
-#define LED3_GPIO       GPIOC
-#define LED4_PIN        4
-#define LED4_GPIO       GPIOC
-#define LED5_PIN        8
-#define LED5_GPIO       GPIOB
-#define LED6_PIN        0
-#define LED6_GPIO       GPIOC
-#define LED7_PIN        9
-#define LED7_GPIO       GPIOB
-#define LED8_PIN        10
-#define LED8_GPIO       GPIOA
-#define LEDAUX_PIN      10
-#define LEDAUX_GPIO     GPIOB
+#define LED1_PIN        0
+#define LED2_GPIO       GPIOA
+#define LED2_PIN        7
+#define LED3_GPIO       GPIOA
+#define LED3_PIN        6
 
 // USB
-#define USB_GPIO		GPIOA
-#define USB_DM_PIN		11
-#define USB_DP_PIN		12
+//#define USB_GPIO		GPIOA
+//#define USB_DM_PIN		11
+//#define USB_DP_PIN		12
 #endif
 
 #if 1 // =========================== SPI =======================================
@@ -54,19 +46,23 @@
 #endif
 
 #if 1 // ========================== USART ======================================
-#define UART            USART1
-#define UART_TX_REG     UART->DR
-#define UART_RX_REG     UART->DR
+#define UART            USART2
+#define UART_TX_REG     UART->TDR
+#define UART_RX_REG     UART->RDR
 #endif
 
 #if 1 // =========================== DMA =======================================
+#define STM32_DMA_REQUIRED  TRUE
 // Uart
-#define UART_DMA_TX     STM32_DMA2_STREAM7
-#define UART_DMA_RX     STM32_DMA2_STREAM5
-#define UART_DMA_CHNL   4
+#define UART_DMA_TX     STM32_DMA1_STREAM4
+#define UART_DMA_RX     STM32_DMA1_STREAM5
+#define UART_DMA_CHNL   0   // Dummy
 
 // ADC
-#define ADC_DMA         STM32_DMA2_STREAM4
+/* DMA request mapped on this DMA channel only if the corresponding remapping bit is cleared in the SYSCFG_CFGR1
+ * register. For more details, please refer to Section10.1.1: SYSCFG configuration register 1 (SYSCFG_CFGR1) on
+ * page173 */
+#define ADC_DMA         STM32_DMA1_STREAM1
 #define ADC_DMA_MODE    STM32_DMA_CR_CHSEL(0) |   /* DMA2 Stream4 Channel0 */ \
                         DMA_PRIORITY_LOW | \
                         STM32_DMA_CR_MSIZE_HWORD | \
@@ -77,7 +73,8 @@
 
 #endif
 
-#if 1 // =========================== ADC =======================================
+#if 0 // =========================== ADC =======================================
+#define ADC_REQUIRED        TRUE
 // Clock divider: clock is generated from the APB2
 #define ADC_CLK_DIVIDER		adcDiv2	// 32MHz / 2 = 16MHz
 

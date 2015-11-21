@@ -24,13 +24,17 @@ void Timer_t::Init() {
     else if(ITmr == TIM9)  { rccEnableAPB2(RCC_APB2ENR_TIM9EN,  FALSE); }
     else if(ITmr == TIM10) { rccEnableAPB2(RCC_APB2ENR_TIM10EN, FALSE); }
     else if(ITmr == TIM11) { rccEnableAPB2(RCC_APB2ENR_TIM11EN, FALSE); }
-#elif defined STM32F030
+#elif defined STM32F0XX
     if     (ITmr == TIM1)  { rccEnableTIM1(FALSE); }
     else if(ITmr == TIM2)  { rccEnableTIM2(FALSE); }
     else if(ITmr == TIM3)  { rccEnableTIM3(FALSE); }
+#ifdef TIM6
     else if(ITmr == TIM6)  { rccEnableAPB1(RCC_APB1ENR_TIM6EN,  FALSE); }
+#endif
     else if(ITmr == TIM14) { RCC->APB1ENR |= RCC_APB1ENR_TIM14EN; }
+#ifdef TIM15
     else if(ITmr == TIM15) { RCC->APB2ENR |= RCC_APB2ENR_TIM15EN; }
+#endif
     else if(ITmr == TIM16) { RCC->APB2ENR |= RCC_APB2ENR_TIM16EN; }
     else if(ITmr == TIM17) { RCC->APB2ENR |= RCC_APB2ENR_TIM17EN; }
     // Clock src
@@ -70,17 +74,19 @@ void Timer_t::InitPwm(GPIO_TypeDef *GPIO, uint16_t N, uint8_t Chnl, uint32_t ATo
     if              (ITmr == TIM2)              PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF1);
     else if(ANY_OF_2(ITmr, TIM3, TIM4))         PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF2);
     else if(ANY_OF_3(ITmr, TIM9, TIM10, TIM11)) PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF3);
-#elif defined STM32F030
+#elif defined STM32F0XX
     if     (ITmr == TIM1)  PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF2);
     else if(ITmr == TIM3)  PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF1);
     else if(ITmr == TIM14) {
         if(GPIO == GPIOA) PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF4);
         else PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF0);
     }
+#ifdef TIM15
     else if(ITmr == TIM15) {
         if(GPIO == GPIOA) PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF0);
         else PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF1);
     }
+#endif
     else if(ITmr == TIM16 or ITmr == TIM17) {
         if(GPIO == GPIOA) PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF5);
         else PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF2);
@@ -126,7 +132,7 @@ void Timer_t::SetUpdateFrequency(uint32_t FreqHz) {
     else // APB1 is clock src
     	SetTopValue((*PClk * Clk.TimerAPB1ClkMulti) / FreqHz);
 #else
-    uint32_t UpdFreqMax = *PClk / (ITmr->ARR + 1);
+//    uint32_t UpdFreqMax = *PClk / (ITmr->ARR + 1);
 #endif
 	ITmr->CNT = 0;  // Reset counter to start from scratch
 //#if defined STM32F2XX || defined STM32F4XX

@@ -15,11 +15,11 @@
 #include "clocking.h"
 
 // Lib version
-#define KL_LIB_VERSION      "20151102_1339"
+#define KL_LIB_VERSION      "20151116_0109"
 
 #if defined STM32L1XX_MD
 #include "stm32l1xx.h"
-#elif defined STM32F030
+#elif defined STM32F0XX
 #include "stm32f0xx.h"
 #elif defined STM32F2XX
 #include "stm32f2xx.h"
@@ -363,23 +363,24 @@ enum PinSpeed_t {
     ps100MHz = 0b11
 };
 #define PIN_SPEED_DEFAULT   ps50MHz
-#else
+#elif defined STM32F0XX
 enum PinSpeed_t {
-    ps400kHz = 0b00,
-    ps2MHz   = 0b01,
-    ps10MHz  = 0b10,
-    ps40MHz  = 0b11
+    psLow = 0b00,
+    psMedium = 0b01,
+    psHigh = 0b11
 };
-#define PIN_SPEED_DEFAULT   ps40MHz
+#define PIN_SPEED_DEFAULT   psMedium
 #endif
 
 enum PinAF_t {
     AF0=0, AF1=1, AF2=2, AF3=3, AF4=4, AF5=5, AF6=6, AF7=7,
+#if defined STM32F2XX || defined STM32F4XX
     AF8=8, AF9=9,AF10=10, AF11=11, AF12=12, AF13=13, AF14=14, AF15=15
+#endif
 };
 
 // Set/clear
-#if defined STM32L1XX_MD || defined STM32F2XX || defined STM32F4XX
+#if defined STM32L1XX_MD || defined STM32F2XX || defined STM32F4XX || defined STM32F042x6
 static inline void PinSet    (GPIO_TypeDef *PGpioPort, const uint16_t APinNumber) { PGpioPort->BSRRL = (uint16_t)(1<<APinNumber); }
 static inline void PinClear  (GPIO_TypeDef *PGpioPort, const uint16_t APinNumber) { PGpioPort->BSRRH = (uint16_t)(1<<APinNumber); }
 #elif defined STM32F030 || defined STM32F10X_LD_VL
@@ -407,8 +408,14 @@ static void PinClockEnable(GPIO_TypeDef *PGpioPort) {
     if     (PGpioPort == GPIOA) RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
     else if(PGpioPort == GPIOB) RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
     else if(PGpioPort == GPIOC) RCC->AHBENR |= RCC_AHBENR_GPIOCEN;
+#ifdef GPIOD
     else if(PGpioPort == GPIOD) RCC->AHBENR |= RCC_AHBENR_GPIODEN;
 #endif
+#ifdef GPIOF
+    else if(PGpioPort == GPIOF) RCC->AHBENR |= RCC_AHBENR_GPIOFEN;
+#endif
+
+#endif // MCU type
 }
 
 static inline void PinSetupOut(
@@ -739,7 +746,7 @@ static inline void ClearStandbyFlag() { PWR->CR |= PWR_CR_CSBF; }
 #endif
 #endif
 
-#if 1 // ============================== SPI ====================================
+#if 0 // ============================== SPI ====================================
 enum CPHA_t {cphaFirstEdge, cphaSecondEdge};
 enum CPOL_t {cpolIdleLow, cpolIdleHigh};
 enum SpiBaudrate_t {
