@@ -21,12 +21,14 @@ int main(void) {
     chSysInit();
 
     // ==== Init hardware ====
-    Uart.Init(115200, UART_GPIO, UART_TX_PIN, UART_GPIO, UART_RX_PIN);
-    Uart.Printf("\r%S %S", APP_NAME, APP_VERSION);
+    Uart.Init(115200, UART_GPIO, UART_TX_PIN);
+    Uart.Printf("\r%S %S\r", APP_NAME, APP_VERSION);
     Clk.PrintFreqs();
-    if(ClkResult != 0) Uart.Printf("\rXTAL failure");
+    if(ClkResult != 0) Uart.Printf("XTAL failure\r");
 
     App.InitThread();
+    // LEDs
+
 
     // Main cycle
     App.ITask();

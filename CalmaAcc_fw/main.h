@@ -13,6 +13,7 @@
 #include "uart.h"
 #include "evt_mask.h"
 #include "board.h"
+#include "led.h"
 
 #define APP_NAME            "CalmaAcc"
 #define APP_VERSION         __DATE__ " " __TIME__

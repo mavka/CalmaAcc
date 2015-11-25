@@ -199,7 +199,7 @@ void Uart_t::OnAHBFreqChange() {
 #if defined STM32L1XX_MD || defined STM32F100_MCUCONF
     if(UART == USART1) UART->BRR = Clk.APB2FreqHz / IBaudrate;
     else               UART->BRR = Clk.APB1FreqHz / IBaudrate;
-#elif defined STM32F030
+#elif defined STM32F030 || defined STM32F042x6
     UART->BRR = Clk.APBFreqHz / IBaudrate;
 #elif defined STM32F2XX || defined STM32F4XX
     if(UART == USART1 or UART == USART6)
