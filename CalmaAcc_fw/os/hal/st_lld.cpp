@@ -171,12 +171,13 @@ OSAL_IRQ_HANDLER(SysTick_Handler) {
  *
  * @isr
  */
-#ifdef __cplusplus
 extern "C" {
-#endif
 OSAL_IRQ_HANDLER(ST_HANDLER) {
 
   OSAL_IRQ_PROLOGUE();
+
+//GPIOB->BSRRL = 1<<1;
+//for(volatile uint32_t i=0; i<8000000; i++);
 
   /* Note, under rare circumstances an interrupt can remain latched even if
      the timer SR register has been cleared, in those cases the interrupt
@@ -191,9 +192,7 @@ OSAL_IRQ_HANDLER(ST_HANDLER) {
 
   OSAL_IRQ_EPILOGUE();
 }
-#ifdef __cplusplus
-}
-#endif
+} // extern c
 #endif /* OSAL_ST_MODE == OSAL_ST_MODE_FREERUNNING */
 
 /*===========================================================================*/

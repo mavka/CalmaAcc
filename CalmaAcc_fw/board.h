@@ -29,7 +29,7 @@
 
 // LEDs
 #define LED0_GPIO       GPIOB
-#define LED0_PIN        0
+#define LED0_PIN        1
 #define LED1_GPIO       GPIOA
 #define LED1_PIN        7
 #define LED2_GPIO       GPIOA
@@ -45,6 +45,10 @@
 #define TIM_LED0        TIM3
 #define TIM_LED1        TIM3
 #define TIM_LED2        TIM3
+
+#define TIMC_LED0       4
+#define TIMC_LED1       1
+#define TIMC_LED2       2
 
 #endif
 

@@ -242,6 +242,19 @@ const LedSmoothChunk_t lsqEnterIdle[] = {
 
 #endif
 
+#if 1 // ========================== LED Smooth Many ============================
+#define LED_SM_CNT      3
+typedef LedSMBaseChunk_t<LED_SM_CNT> LedSMChunk_t;
+
+const LedSMChunk_t lscIdle[] = {
+        {csSetup, 630, {0,0,255}},
+        {csSetup, 630, {0,255,0}},
+        {csSetup, 630, {255,0,0}},
+        {csEnd}
+};
+
+#endif
+
 #if 0 // ============================= Beeper ==================================
 #define BEEP_VOLUME     2
 

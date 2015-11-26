@@ -6,14 +6,16 @@
  */
 
 #include "main.h"
+#include "Sequences.h"
+#include "led.h"
 
 App_t App;
+LedSmoothMany_t Leds;
 
 int main(void) {
     // ==== Setup clock frequency ====
-    uint8_t ClkResult = 1;
-    Clk.SetupFlashLatency(8);  // Setup Flash Latency for clock in MHz
-    Clk.SetupBusDividers(ahbDiv1, apbDiv1);
+//    Clk.SetupFlashLatency(2);  // Setup Flash Latency for clock in MHz
+//    Clk.SetupBusDividers(ahbDiv4, apbDiv1);
     Clk.UpdateFreqValues();
 
     // Init OS
@@ -21,13 +23,26 @@ int main(void) {
     chSysInit();
 
     // ==== Init hardware ====
+    PinSetupOut(GPIOB, 1, omPushPull);
+    PinSetupOut(GPIOA, 6, omPushPull);
+    PinSet(GPIOA, 6);
+    PinSetupOut(GPIOA, 7, omPushPull);
+    PinSet(GPIOA, 7);
+
     Uart.Init(115200, UART_GPIO, UART_TX_PIN);
     Uart.Printf("\r%S %S\r", APP_NAME, APP_VERSION);
-    Clk.PrintFreqs();
-    if(ClkResult != 0) Uart.Printf("XTAL failure\r");
+//    Uart.PrintfNow("\rogo");
+//    Clk.PrintFreqs();
 
-    App.InitThread();
+//    App.InitThread();
     // LEDs
+//    Leds.Ch[0].Init(LED0_GPIO, LED0_PIN, TIM_LED0, TIMC_LED0);
+//    Leds.Ch[1].Init(LED1_GPIO, LED1_PIN, TIM_LED1, TIMC_LED1);
+//    Leds.Ch[2].Init(LED2_GPIO, LED2_PIN, TIM_LED2, TIMC_LED2);
+//
+//    Leds.Ch[0].Set(1);
+//    Leds.Ch[1].Set(4);
+//    Leds.Ch[2].Set(7);
 
 
     // Main cycle
@@ -37,16 +52,19 @@ int main(void) {
 __attribute__ ((__noreturn__))
 void App_t::ITask() {
     while(true) {
-        uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
-        if(EvtMsk & EVTMSK_UART_NEW_CMD) {
-            OnCmd((Shell_t*)&Uart);
-            Uart.SignalCmdProcessed();
-        }
+//        chThdSleepMilliseconds(900);
+        PinToggle(GPIOA, 6);
+//        Uart.PrintfNow("Aga\r");
+//        uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
+//        if(EvtMsk & EVTMSK_UART_NEW_CMD) {
+//            OnCmd((Shell_t*)&Uart);
+//            Uart.SignalCmdProcessed();
+//        }
 
     } // while true
 }
 
-#if 1 // ======================= Command processing ============================
+#if 0 // ======================= Command processing ============================
 void App_t::OnCmd(Shell_t *PShell) {
 	Cmd_t *PCmd = &PShell->Cmd;
     __attribute__((unused)) int32_t dw32 = 0;  // May be unused in some configurations

@@ -608,9 +608,17 @@ public:
         InitPwm(PGpio, Pin, TmrChnl, TopValue, Inverted, OutputType);
         Enable();
     }
+    void Init(GPIO_TypeDef *APGpio, uint16_t APin, TIM_TypeDef *APTimer, uint32_t ATmrChnl) {
+        PGpio = APGpio;
+        Pin = APin;
+        TmrChnl = ATmrChnl;
+        ITmr = APTimer;
+        Init();
+    }
     void SetFrequencyHz(uint32_t FreqHz) { Timer_t::SetUpdateFrequency(FreqHz); }
     PinOutputPWM_t(GPIO_TypeDef *APGpio, uint16_t APin, TIM_TypeDef *APTimer, uint32_t ATmrChnl) :
         PGpio(APGpio), Pin(APin), TmrChnl(ATmrChnl) { ITmr = APTimer; }
+    PinOutputPWM_t() : PGpio(nullptr), Pin(0), TmrChnl(0) { ITmr = nullptr; }
 };
 #endif
 

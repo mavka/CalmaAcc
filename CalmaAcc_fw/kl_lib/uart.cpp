@@ -19,6 +19,7 @@ void CmdUartTxIrq(void *p, uint32_t flags) { Uart.IRQDmaTxHandler(); }
 
 // ==== TX DMA IRQ ====
 void Uart_t::IRQDmaTxHandler() {
+PinSet(GPIOB, 1);
     dmaStreamDisable(UART_DMA_TX);    // Registers may be changed only when stream is disabled
     IFullSlotsCount -= ITransSize;
     PRead += ITransSize;
@@ -88,7 +89,7 @@ static inline void FPutCharNow(char c) {
     while(!(UART->SR & USART_SR_TXE));
     UART_TX_REG = c;
     while(!(UART->SR & USART_SR_TXE));
-#elif defined STM32F030
+#elif defined STM32F0XX
     while(!(UART->ISR & USART_ISR_TXE));
     UART_TX_REG = c;
     while(!(UART->ISR & USART_ISR_TXE));

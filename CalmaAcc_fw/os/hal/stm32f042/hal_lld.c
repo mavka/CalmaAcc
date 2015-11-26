@@ -69,6 +69,10 @@ void hal_lld_init(void) {
   /* PWR clock enabled.*/
   rccEnablePWRInterface(FALSE);
 
+  rccEnableDMA1(FALSE);
+
+  rccEnableAPB2(RCC_APB2ENR_SYSCFGEN, TRUE);
+
 #if defined(STM32_DMA_REQUIRED)
   dmaInit();
 #endif

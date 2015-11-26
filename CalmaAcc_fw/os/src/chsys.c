@@ -122,7 +122,7 @@ void chSysInit(void) {
   setcurrp(_thread_init(&ch.mainthread, IDLEPRIO));
 #endif
 
-  currp->p_state = CH_STATE_CURRENT;
+//  currp->p_state = CH_STATE_CURRENT;
 #if CH_DBG_ENABLE_STACK_CHECK == TRUE
   /* This is a special case because the main thread thread_t structure is not
      adjacent to its stack area.*/

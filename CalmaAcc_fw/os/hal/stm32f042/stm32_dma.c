@@ -160,25 +160,25 @@ OSAL_IRQ_HANDLER(Vector68) {
  * @isr
  */
 OSAL_IRQ_HANDLER(Vector6C) {
-  uint32_t flags;
-
-  OSAL_IRQ_PROLOGUE();
-
-  /* Check on channel 4.*/
-  flags = (DMA1->ISR >> 12) & STM32_DMA_ISR_MASK;
-  if (flags & STM32_DMA_ISR_MASK) {
-    DMA1->IFCR = flags << 12;
-    if (dma_isr_redir[3].dma_func)
-      dma_isr_redir[3].dma_func(dma_isr_redir[3].dma_param, flags);
-  }
-
-  /* Check on channel 5.*/
-  flags = (DMA1->ISR >> 16) & STM32_DMA_ISR_MASK;
-  if (flags & STM32_DMA_ISR_MASK) {
-    DMA1->IFCR = flags << 16;
-    if (dma_isr_redir[4].dma_func)
-      dma_isr_redir[4].dma_func(dma_isr_redir[4].dma_param, flags);
-  }
+//  uint32_t flags;
+//
+//  OSAL_IRQ_PROLOGUE();
+//
+//  /* Check on channel 4.*/
+//  flags = (DMA1->ISR >> 12) & STM32_DMA_ISR_MASK;
+//  if (flags & STM32_DMA_ISR_MASK) {
+//    DMA1->IFCR = flags << 12;
+//    if (dma_isr_redir[3].dma_func)
+//      dma_isr_redir[3].dma_func(dma_isr_redir[3].dma_param, flags);
+//  }
+//
+//  /* Check on channel 5.*/
+//  flags = (DMA1->ISR >> 16) & STM32_DMA_ISR_MASK;
+//  if (flags & STM32_DMA_ISR_MASK) {
+//    DMA1->IFCR = flags << 16;
+//    if (dma_isr_redir[4].dma_func)
+//      dma_isr_redir[4].dma_func(dma_isr_redir[4].dma_param, flags);
+//  }
 
 #if STM32_DMA_STREAMS > 5
   /* Check on channel 6.*/
@@ -198,7 +198,7 @@ OSAL_IRQ_HANDLER(Vector6C) {
   }
 #endif
 
-  OSAL_IRQ_EPILOGUE();
+//  OSAL_IRQ_EPILOGUE();
 }
 
 /*===========================================================================*/

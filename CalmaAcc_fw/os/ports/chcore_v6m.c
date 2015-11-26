@@ -60,19 +60,19 @@
 /*lint -save -e9075 [8.4] All symbols are invoked from asm context.*/
 void NMI_Handler(void) {
 /*lint -restore*/
-
-  /* The port_extctx structure is pointed by the PSP register.*/
-  struct port_extctx *ctxp = (struct port_extctx *)__get_PSP();
-
-  /* Discarding the current exception context and positioning the stack to
-     point to the real one.*/
-  ctxp++;
-
-  /* Writing back the modified PSP value.*/
-  __set_PSP((uint32_t)ctxp);
-
-  /* Restoring the normal interrupts status.*/
-  port_unlock_from_isr();
+//
+//  /* The port_extctx structure is pointed by the PSP register.*/
+//  struct port_extctx *ctxp = (struct port_extctx *)__get_PSP();
+//
+//  /* Discarding the current exception context and positioning the stack to
+//     point to the real one.*/
+//  ctxp++;
+//
+//  /* Writing back the modified PSP value.*/
+//  __set_PSP((uint32_t)ctxp);
+//
+//  /* Restoring the normal interrupts status.*/
+//  port_unlock_from_isr();
 }
 #endif /* !CORTEX_ALTERNATE_SWITCH */
 

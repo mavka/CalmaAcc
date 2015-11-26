@@ -12,12 +12,8 @@
 #include "color.h"
 #include "ChunkTypes.h"
 #include "uart.h"
-
-#ifdef STM32F2XX
-#include "kl_lib_f2xx.h"
-#elif defined STM32L1XX_MD || defined STM32L1XX_HD
-#include <kl_lib.h>
-#endif
+#include "kl_lib.h"
+#include "Sequences.h"
 
 #if 1 // =========================== Common auxilary ===========================
 // TimeToWaitBeforeNextAdjustment = SmoothVar / (N+4) + 1, where N - current LED brightness.
@@ -121,7 +117,8 @@ public:
 };
 #endif
 
-#if 1 // ============================== LedRGB =================================
+
+#if 0 // ============================== LedRGB =================================
 #define LED_RGB
 #define LED_RGB_TOP_VALUE   255 // Intencity 0...255
 #define LED_RGB_INVERTED    invNotInverted
@@ -178,5 +175,61 @@ public:
     }
 };
 #endif
+
+
+#if 1 // =========================== LedSmoothMany =============================
+#define LED_SMOOTH_MANY
+#define LED_SM_TOP_VALUE    255 // Intencity 0...255
+#define LED_SM_INVERTED     invNotInverted
+
+class LedSmoothMany_t : public BaseSequencer_t<LedSMChunk_t> {
+private:
+    LedSMChunk_t ICurr;
+    void ISwitchOff() { for(uint32_t i=0; i<LED_SM_CNT; i++) Ch[i].Set(0); }
+    SequencerLoopTask_t ISetup() {
+        if(ICurr != *IPCurrentChunk) {
+            if(IPCurrentChunk->Value == 0) {    // If smooth time is zero,
+                ICurr = *IPCurrentChunk;
+                Set(&ICurr);                    // set brightness now,
+                IPCurrentChunk++;               // and goto next chunk
+            }
+            else {
+                Adjust();
+                Set(&ICurr);
+                // Check if completed now
+                if(ICurr == *IPCurrentChunk) IPCurrentChunk++;
+                else { // Not completed
+                    // Calculate time to next adjustment
+                    uint32_t Delay = 0;
+                    for(uint32_t i=0; i<LED_SM_CNT; i++) {
+                        uint32_t DelayTmp = (ICurr.Brightness[i] == IPCurrentChunk->Brightness[i])? 0 : ICalcDelay(ICurr.Brightness[i], IPCurrentChunk->Value);
+                        if(DelayTmp > Delay) Delay = DelayTmp;
+                    }
+                    SetupDelay(Delay);
+                    return sltBreak;
+                } // Not completed
+            } // if time > 256
+        } // if color is different
+        else IPCurrentChunk++; // Color is the same, goto next chunk
+        return sltProceed;
+    }
+    void Adjust() {
+        for(uint32_t i=0; i<LED_SM_CNT; i++) {
+            if     (ICurr.Brightness[i] < IPCurrentChunk->Brightness[i]) ICurr.Brightness[i]++;
+            else if(ICurr.Brightness[i] > IPCurrentChunk->Brightness[i]) ICurr.Brightness[i]--;
+        }
+    }
+public:
+    PinOutputPWM_t<LED_SM_TOP_VALUE, LED_SM_INVERTED, omPushPull> Ch[LED_SM_CNT];
+    LedSmoothMany_t() : BaseSequencer_t() { }
+
+    void Set(LedSMChunk_t *PCh) {
+        for(uint32_t i=0; i<LED_SM_CNT; i++) {
+            Ch[i].Set(PCh->Brightness[i]);
+        }
+    }
+};
+#endif
+
 
 #endif /* LED_RGB_H_ */

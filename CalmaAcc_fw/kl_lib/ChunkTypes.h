@@ -46,6 +46,25 @@ struct BeepChunk_t {   // Value == Volume
     uint16_t Freq_Hz;
 } __attribute__((packed));
 
+// LED smooth many
+template <uint32_t Cnt>
+struct LedSMBaseChunk_t {
+    BaseChunk_Vars;
+    uint8_t Brightness[Cnt];
+    bool operator == (const LedSMBaseChunk_t<Cnt> &AChunk) {
+        for(uint32_t i=0; i<Cnt; i++) {
+            if(Brightness[i] != AChunk.Brightness[i]) return false;
+        }
+        return true;
+    }
+    bool operator != (const LedSMBaseChunk_t<Cnt> &AChunk) {
+        for(uint32_t i=0; i<Cnt; i++) {
+            if(Brightness[i] != AChunk.Brightness[i]) return true;
+        }
+        return false;
+    }
+} __attribute__((packed));
+
 
 #if 1 // ====================== Base sequencer class ===========================
 enum SequencerLoopTask_t {sltProceed, sltBreak};
@@ -60,15 +79,15 @@ public:
 
 // Common Timer callback
 static void GeneralSequencerTmrCallback(void *p) {
-    chSysLockFromIsr();
+    chSysLockFromISR();
     ((BaseSequenceProcess_t*)p)->IProcessSequenceI();
-    chSysUnlockFromIsr();
+    chSysUnlockFromISR();
 }
 
 template <class TChunk>
 class BaseSequencer_t : public BaseSequenceProcess_t {
 private:
-    VirtualTimer ITmr;
+    virtual_timer_t ITmr;
 protected:
     const TChunk *IPStartChunk, *IPCurrentChunk;
     BaseSequencer_t() : IPStartChunk(nullptr), IPCurrentChunk(nullptr) {}
