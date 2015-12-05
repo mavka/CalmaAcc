@@ -64,6 +64,7 @@
 #define UART            USART2
 #define UART_TX_REG     UART->TDR
 #define UART_RX_REG     UART->RDR
+#define UART_RCC_ENABLE()   rccEnableUSART2(FALSE)
 #endif
 
 #if 0 // =========================== ADC =======================================

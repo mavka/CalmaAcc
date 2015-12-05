@@ -8,15 +8,33 @@
 #ifndef SEQUENCES_H_
 #define SEQUENCES_H_
 
-struct OnOffTime_t {
-    uint32_t OnTime, OffTime;
+enum SeqType_t {stSet, stWait, stGoto};
+enum VibroState_t {VibroOn, VibroOff};
+
+struct Seq_t {
+    SeqType_t Type;
+    union {
+        struct {
+            uint32_t Brightness;
+            uint32_t Smooth;
+        };
+        uint32_t Indx;
+        uint32_t Time_ms;
+    };
+    VibroState_t VibroOn;
 };
 
-static const OnOffTime_t Seq[] = {
-        {27, 270},
-        {27, 1800}
+#define SMOOTH_VAR  18
+
+static const Seq_t Seq[] = {
+        {stSet, 100, SMOOTH_VAR, VibroOn},
+        {stSet, 0,   SMOOTH_VAR, VibroOff},
+        {stWait, 200},
+        {stSet, 100, SMOOTH_VAR, VibroOn},
+        {stSet, 0,   SMOOTH_VAR, VibroOff},
+        {stWait, 1800},
+        {stGoto, 0}
 };
-#define SEQ_CNT   2
 
 
 

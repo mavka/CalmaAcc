@@ -8,6 +8,13 @@
 #ifndef KL_LIB_H_
 #define KL_LIB_H_
 
+#include "stm32f0xx_hal.h"
+
+enum State_t {
+    staInProgress,
+    staDone
+};
+
 #define TMR_ENABLE(PTimer)          PTimer->CR1 |=  TIM_CR1_CEN;
 #define TMR_DISABLE(PTimer)         PTimer->CR1 &= ~TIM_CR1_CEN;
 #define TMR_PCCR(PTimer, AChannel)  ((uint32_t*)(&PTimer->CCR1 + AChannel-1))
@@ -92,13 +99,18 @@ static inline void PinSetupAlterFunc(
     PGpioPort->AFR[n] |= (uint32_t)AAlterFunc << Offset;
 }
 
+
+#if 1 // ============================ Time =====================================
 static inline bool TimeElapsed(uint32_t *PSince, uint32_t Delay_ms) {
     bool Rslt = (uint32_t)(HAL_GetTick() - *PSince) > Delay_ms;
     if(Rslt) *PSince = HAL_GetTick();
     return Rslt;
 }
 
+static inline void ResetDelayVar(uint32_t *PSince) {
+    *PSince = HAL_GetTick();
+}
 
-
+#endif
 
 #endif /* KL_LIB_H_ */

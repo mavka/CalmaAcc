@@ -35,31 +35,61 @@
 #include "Ledt.h"
 #include "board.h"
 #include "Vibro.h"
+#include "Sequences.h"
+#include "uart.h"
 
-void SystemClock_Config(void);
+void SystemClock_Config();
 
-Led_t Led[3];
+Led_t Led;
 Vibro_t Vibro;
+
+const Seq_t *PStart = Seq, *PCurr = Seq;
+uint32_t DelayVar = 0;
+void SwitchSeqChunk();
 
 int main(void) {
     SystemClock_Config();
 
-    Led[0].Init(LED0_GPIO, LED0_PIN, TIM_LED0, TIMC_LED0);
-    Led[1].Init(LED1_GPIO, LED1_PIN, TIM_LED1, TIMC_LED1);
-    Led[2].Init(LED2_GPIO, LED2_PIN, TIM_LED2, TIMC_LED2);
+    Uart.Init(115200, UART_GPIO, UART_TX_PIN);
+    Uart.PrintfNow("\rAga\r");
 
-    Led[0].SmoothVar = 90;
-    Led[1].SmoothVar = 90;
-    Led[2].SmoothVar = 90;
-
+    Led.Init();
     Vibro.Init(VIBRO_GPIO, VIBRO_PIN);
 
-    while(1) {
-        Led[0].Task();
-        Led[1].Task();
-        Led[2].Task();
-        Vibro.Task();
-    }
+    SwitchSeqChunk();
+
+    while(true) {
+        switch(PCurr->Type) {
+            case stSet:
+                if(Led.Task() == staDone) SwitchSeqChunk();
+                break;
+
+            case stWait:
+                if(TimeElapsed(&DelayVar, PCurr->Time_ms)) SwitchSeqChunk();
+                break;
+
+            case stGoto:
+                PCurr = PStart + PCurr->Indx;
+                break;
+        } // switch
+    } // while 1
+}
+
+void SwitchSeqChunk() {
+    PCurr++;
+    switch(PCurr->Type) {
+        case stSet:
+            // Prepare Led
+            Led.Start(PCurr->Brightness, PCurr->Smooth);
+            break;
+
+        case stWait:
+            ResetDelayVar(&DelayVar);   // Reset delayvar
+            break;
+
+        case stGoto:
+            break;
+    } // switch
 }
 
 void SystemClock_Config(void) {
@@ -79,7 +109,7 @@ void SystemClock_Config(void) {
     RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
     HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
 
-    HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+    HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq() / 1000);
 
     HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
