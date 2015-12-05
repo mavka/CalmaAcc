@@ -34,62 +34,78 @@
 #include "stm32f0xx_hal.h"
 #include "Ledt.h"
 #include "board.h"
-#include "Vibro.h"
 #include "Sequences.h"
 #include "uart.h"
 
 void SystemClock_Config();
 
 Led_t Led;
-Vibro_t Vibro;
 
 const Seq_t *PStart = Seq, *PCurr = Seq;
 uint32_t DelayVar = 0;
 void SwitchSeqChunk();
 
+#define VibroOn()   PinSet(VIBRO_GPIO, VIBRO_PIN)
+#define VibroOff()  PinClear(VIBRO_GPIO, VIBRO_PIN)
+
 int main(void) {
     SystemClock_Config();
 
     Uart.Init(115200, UART_GPIO, UART_TX_PIN);
-    Uart.PrintfNow("\rAga\r");
+    Uart.PrintfNow("\rCalmaAcc\r");
 
     Led.Init();
-    Vibro.Init(VIBRO_GPIO, VIBRO_PIN);
+    // Vibro
+    PinSetupOut(VIBRO_GPIO, VIBRO_PIN, omPushPull);
 
     SwitchSeqChunk();
 
     while(true) {
         switch(PCurr->Type) {
             case stSet:
-                if(Led.Task() == staDone) SwitchSeqChunk();
+                if(Led.Task() == staDone) {
+                    PCurr++;
+                    SwitchSeqChunk();
+                }
                 break;
 
             case stWait:
-                if(TimeElapsed(&DelayVar, PCurr->Time_ms)) SwitchSeqChunk();
+                if(TimeElapsed(&DelayVar, PCurr->Time_ms)) {
+                    PCurr++;
+                    SwitchSeqChunk();
+                }
                 break;
 
             case stGoto:
                 PCurr = PStart + PCurr->Indx;
+                SwitchSeqChunk();
                 break;
         } // switch
     } // while 1
 }
 
 void SwitchSeqChunk() {
-    PCurr++;
+//    uint32_t N = PCurr - PStart;
+//    Uart.PrintfNow("N=%u", N);
     switch(PCurr->Type) {
         case stSet:
+//            Uart.PrintfNow("   Set=%u", PCurr->Brightness);
             // Prepare Led
             Led.Start(PCurr->Brightness, PCurr->Smooth);
+            // Vibro
+            if(PCurr->VibroState == VibroOn) VibroOn();
+            else VibroOff();
             break;
 
         case stWait:
+//            Uart.PrintfNow("   W=%u", PCurr->Time_ms);
             ResetDelayVar(&DelayVar);   // Reset delayvar
             break;
 
         case stGoto:
             break;
     } // switch
+//    Uart.PrintfNow("\r");
 }
 
 void SystemClock_Config(void) {

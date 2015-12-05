@@ -39,7 +39,7 @@ void Led_t::Set(const uint8_t AValue) {
 }
 
 uint8_t Led_t::Inc() {
-    if(CurrBrt >= TOP_VALUE) return 1;
+    if(CurrBrt >= LED_TOP_VALUE) return 1;
     else {
         CurrBrt++;
         for(uint8_t i=0; i<LED_CNT; i++) {
@@ -77,7 +77,7 @@ void Led_t::InitPwm(uint8_t N) {
         if(LedCfg[N].PGpio == GPIOA) PinSetupAlterFunc(LedCfg[N].PGpio, LedCfg[N].Pin, omPushPull, pudNone, AF5);
         else PinSetupAlterFunc(LedCfg[N].PGpio, LedCfg[N].Pin, omPushPull, pudNone, AF2);
     }
-    LedCfg[N].PTimer->ARR = TOP_VALUE;
+    LedCfg[N].PTimer->ARR = LED_TOP_VALUE;
     // Output
     uint16_t tmp = (INVERTED == invInverted)? 0b111 : 0b110; // PWM mode 1 or 2
     switch(LedCfg[N].TmrChnl) {

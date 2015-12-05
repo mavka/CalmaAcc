@@ -54,6 +54,7 @@
 #define TIMC_LED1       1
 #define TIMC_LED2       2
 
+#define LED_TOP_VALUE   100
 #endif
 
 #if 1 // =========================== SPI =======================================

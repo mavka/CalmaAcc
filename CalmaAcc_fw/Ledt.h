@@ -13,7 +13,6 @@
 #include "kl_lib.h"
 #include "board.h"
 
-#define TOP_VALUE   100
 #define INVERTED    invNotInverted
 
 #define LED_CNT     3

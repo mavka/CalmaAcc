@@ -21,15 +21,15 @@ struct Seq_t {
         uint32_t Indx;
         uint32_t Time_ms;
     };
-    VibroState_t VibroOn;
+    VibroState_t VibroState;
 };
 
-#define SMOOTH_VAR  18
+#define SMOOTH_VAR  9
 
 static const Seq_t Seq[] = {
         {stSet, 100, SMOOTH_VAR, VibroOn},
         {stSet, 0,   SMOOTH_VAR, VibroOff},
-        {stWait, 200},
+        {stWait, 180},
         {stSet, 100, SMOOTH_VAR, VibroOn},
         {stSet, 0,   SMOOTH_VAR, VibroOff},
         {stWait, 1800},
