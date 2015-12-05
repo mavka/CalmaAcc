@@ -13,7 +13,7 @@
 // ==== General ====
 #define BOARD_NAME          "AccCalma"
 // MCU type as defined in the ST header.
-#define STM32F042x6
+//#define STM32F042x6
 
 #define CRYSTAL_FREQ_HZ     12000000    // Freq of external crystal
 
@@ -34,6 +34,10 @@
 #define LED1_PIN        7
 #define LED2_GPIO       GPIOA
 #define LED2_PIN        6
+
+// Vibro
+#define VIBRO_GPIO      GPIOA
+#define VIBRO_PIN       4
 
 // USB
 //#define USB_GPIO		GPIOA
