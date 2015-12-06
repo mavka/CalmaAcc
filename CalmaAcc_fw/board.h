@@ -39,6 +39,10 @@
 #define VIBRO_GPIO      GPIOA
 #define VIBRO_PIN       4
 
+// ACC
+#define ACC_IRQ_GPIO    GPIOA
+#define ACC_IRQ_PIN     0
+
 // USB
 //#define USB_GPIO		GPIOA
 //#define USB_DM_PIN		11

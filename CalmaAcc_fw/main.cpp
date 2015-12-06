@@ -36,11 +36,13 @@
 #include "board.h"
 #include "Sequences.h"
 #include "uart.h"
+#include "acc.h"
 
 void SystemClock_Config();
 
 Led_t Led;
 
+// Sequensor
 const Seq_t *PStart = Seq, *PCurr = Seq;
 uint32_t DelayVar = 0;
 void SwitchSeqChunk();
@@ -58,8 +60,18 @@ int main(void) {
     // Vibro
     PinSetupOut(VIBRO_GPIO, VIBRO_PIN, omPushPull);
 
-    SwitchSeqChunk();
+    // Acc
+    Acc.SetPortAndPins(GPIOF, 1, 0, 5);
+    while(!Acc.IsOperational) {
+        Acc.Init();
+        if(!Acc.IsOperational) {
+            Uart.PrintfNow("Acc fail\r");
+            while(!TimeElapsed(&DelayVar, 450));
+        }
+    }
+    Uart.PrintfNow("Acc Ok\r");
 
+    SwitchSeqChunk();
     while(true) {
         switch(PCurr->Type) {
             case stSet:
@@ -71,6 +83,9 @@ int main(void) {
 
             case stWait:
                 if(TimeElapsed(&DelayVar, PCurr->Time_ms)) {
+                    Acc.ReadAccelerations();
+                    Uart.PrintfNow("%04d %04d %04d\r", Acc.a[0], Acc.a[1], Acc.a[2]);
+                    // Switch to next chunk
                     PCurr++;
                     SwitchSeqChunk();
                 }
@@ -109,9 +124,9 @@ void SwitchSeqChunk() {
 }
 
 void SystemClock_Config(void) {
-
     RCC_OscInitTypeDef RCC_OscInitStruct;
     RCC_ClkInitTypeDef RCC_ClkInitStruct;
+    RCC_PeriphCLKInitTypeDef PeriphClkInit;
 
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
     RCC_OscInitStruct.HSIState = RCC_HSI_ON;
@@ -119,11 +134,15 @@ void SystemClock_Config(void) {
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
     HAL_RCC_OscConfig(&RCC_OscInitStruct);
 
-    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_SYSCLK;
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK;
     RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
-    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV4;
     RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
     HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
+
+    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_I2C1;
+    PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_HSI;
+    HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
 
     HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq() / 1000);
 
