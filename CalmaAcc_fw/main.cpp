@@ -39,6 +39,8 @@
 #include "acc.h"
 
 void SystemClock_Config();
+void AccCheck();
+void SwitchMode();
 
 Led_t Led;
 
@@ -78,13 +80,13 @@ int main(void) {
                 if(Led.Task() == staDone) {
                     PCurr++;
                     SwitchSeqChunk();
+                    // Read Acc
+                    if(PCurr->Tag == TAG_ACC) AccCheck();
                 }
                 break;
 
             case stWait:
                 if(TimeElapsed(&DelayVar, PCurr->Time_ms)) {
-                    Acc.ReadAccelerations();
-                    Uart.PrintfNow("%04d %04d %04d\r", Acc.a[0], Acc.a[1], Acc.a[2]);
                     // Switch to next chunk
                     PCurr++;
                     SwitchSeqChunk();
@@ -122,6 +124,39 @@ void SwitchSeqChunk() {
     } // switch
 //    Uart.PrintfNow("\r");
 }
+
+#if 1 // ============================ Switch ===================================
+//#define IS_LIKE(a, b, t)   (((a) > ((b) - (t))) and ((a) < ((b) + (t))))
+
+int CheckState = 0;
+bool IsSeqAlike(int SeqIndx) {
+    int32_t Sum = 0;
+    for(int i=0; i < 3; i++) {
+        int32_t Dif = Acc.a[i] - SwitchSeq[SeqIndx].a[i];
+        Sum += Dif * Dif;
+    }
+    Uart.PrintfNow("Sum=%u\r", Sum);
+    return (Sum < ACC_TOLERANCE);
+}
+
+void AccCheck() {
+    Acc.ReadAccelerations();
+    Uart.PrintfNow("%03d %03d %03d\r", Acc.a[0], Acc.a[1], Acc.a[2]);
+    // Compare sequence
+    if(IsSeqAlike(CheckState)) CheckState++;
+    else CheckState = 0;    // Reset comparator
+//    Uart.PrintfNow("Cmp=%u\r", CheckState);
+    if(CheckState >= SWITCH_SEQ_LEN) {
+        SwitchMode();
+        CheckState = 0;
+    }
+}
+#endif
+
+void SwitchMode() {
+    Uart.PrintfNow("Switch\r");
+}
+
 
 void SystemClock_Config(void) {
     RCC_OscInitTypeDef RCC_OscInitStruct;
