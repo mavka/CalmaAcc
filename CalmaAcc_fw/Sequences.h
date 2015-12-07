@@ -8,6 +8,8 @@
 #ifndef SEQUENCES_H_
 #define SEQUENCES_H_
 
+#include "board.h"
+
 enum SeqType_t {stSet, stWait, stGoto};
 enum VibroState_t {VibroOn, VibroOff};
 
@@ -32,11 +34,11 @@ struct Seq_t {
 #define TAG_ACC     999
 
 static const Seq_t Seq[] = {
-        {stSet, 100,   SMOOTH_VAR, VibroOn},
-        {stSet, 0,     SMOOTH_VAR, VibroOff},
+        {stSet,  LED_TOP_VALUE, SMOOTH_VAR, VibroOn},
+        {stSet,  0,    SMOOTH_VAR, VibroOff},
         {stWait, 180,  TAG_ACC},
-        {stSet, 100,   SMOOTH_VAR, VibroOn},
-        {stSet, 0,     SMOOTH_VAR, VibroOff},
+        {stSet,  LED_TOP_VALUE, SMOOTH_VAR, VibroOn},
+        {stSet,  0,    SMOOTH_VAR, VibroOff},
         {stWait, 1800, TAG_NONE},
         {stGoto, 0}
 };

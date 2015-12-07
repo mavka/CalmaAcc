@@ -37,12 +37,20 @@
 #include "Sequences.h"
 #include "uart.h"
 #include "acc.h"
+#include "Comparator.h"
+
+#define ACC_POLL_PERIOD     27
 
 void SystemClock_Config();
-void AccCheck();
+// Modes
 void SwitchMode();
+void Off();
+
+enum Mode_t {moVibroBlink=1, moBlink=2, moVibro=3, moSteady=4};
+Mode_t Mode = moVibroBlink;
 
 Led_t Led;
+Comparator_t Comparator;
 
 // Sequensor
 const Seq_t *PStart = Seq, *PCurr = Seq;
@@ -74,14 +82,14 @@ int main(void) {
     Uart.PrintfNow("Acc Ok\r");
 
     SwitchSeqChunk();
+
+    uint32_t AccDelayVar=0;
     while(true) {
         switch(PCurr->Type) {
             case stSet:
                 if(Led.Task() == staDone) {
                     PCurr++;
                     SwitchSeqChunk();
-                    // Read Acc
-                    if(PCurr->Tag == TAG_ACC) AccCheck();
                 }
                 break;
 
@@ -98,6 +106,13 @@ int main(void) {
                 SwitchSeqChunk();
                 break;
         } // switch
+
+        // Read Acc
+        if(TimeElapsed(&AccDelayVar, ACC_POLL_PERIOD)) {
+            Acc.ReadAccelerations();
+//            Uart.PrintfNow("%03d %03d %03d\r", Acc.a[0], Acc.a[1], Acc.a[2]);
+            if(Comparator.ProcessData() == rsltDetected) SwitchMode();
+        }
     } // while 1
 }
 
@@ -108,9 +123,9 @@ void SwitchSeqChunk() {
         case stSet:
 //            Uart.PrintfNow("   Set=%u", PCurr->Brightness);
             // Prepare Led
-            Led.Start(PCurr->Brightness, PCurr->Smooth);
-            // Vibro
-            if(PCurr->VibroState == VibroOn) VibroOn();
+            Led.Start(PCurr->Brightness, PCurr->Smooth, (Mode == moBlink or Mode == moVibroBlink));
+            // Vibro: switch on in appropriate mode and if sequence requires it
+            if(PCurr->VibroState == VibroOn and (Mode == moVibro or Mode == moVibroBlink)) VibroOn();
             else VibroOff();
             break;
 
@@ -125,36 +140,29 @@ void SwitchSeqChunk() {
 //    Uart.PrintfNow("\r");
 }
 
-#if 1 // ============================ Switch ===================================
-//#define IS_LIKE(a, b, t)   (((a) > ((b) - (t))) and ((a) < ((b) + (t))))
-
-int CheckState = 0;
-bool IsSeqAlike(int SeqIndx) {
-    int32_t Sum = 0;
-    for(int i=0; i < 3; i++) {
-        int32_t Dif = Acc.a[i] - SwitchSeq[SeqIndx].a[i];
-        Sum += Dif * Dif;
-    }
-    Uart.PrintfNow("Sum=%u\r", Sum);
-    return (Sum < ACC_TOLERANCE);
-}
-
-void AccCheck() {
-    Acc.ReadAccelerations();
-    Uart.PrintfNow("%03d %03d %03d\r", Acc.a[0], Acc.a[1], Acc.a[2]);
-    // Compare sequence
-    if(IsSeqAlike(CheckState)) CheckState++;
-    else CheckState = 0;    // Reset comparator
-//    Uart.PrintfNow("Cmp=%u\r", CheckState);
-    if(CheckState >= SWITCH_SEQ_LEN) {
-        SwitchMode();
-        CheckState = 0;
-    }
-}
-#endif
-
+#define BLINK_DELAY 9999
 void SwitchMode() {
-    Uart.PrintfNow("Switch\r");
+//    Uart.PrintfNow("Switch\r");
+    // Indicate mode change
+    for(int i = 0; i<9; i++) {
+        Led.Set(LED_TOP_VALUE);
+        DelayLoop(BLINK_DELAY);
+        Led.Set(0);
+        DelayLoop(BLINK_DELAY);
+    }
+    if(Mode == moSteady) Off();
+    else Mode = (Mode_t)((int)Mode + 1);
+    if(Mode == moSteady) Led.Set(LED_TOP_VALUE);
+    switch(Mode) {
+        case moVibroBlink: Uart.PrintfNow("VibroBlink\r"); break;
+        case moBlink: Uart.PrintfNow("Blink\r"); break;
+        case moVibro: Uart.PrintfNow("Vibro\r"); break;
+        case moSteady: Uart.PrintfNow("Steady\r"); break;
+    }
+}
+
+void Off() {
+    Mode = moVibroBlink;
 }
 
 

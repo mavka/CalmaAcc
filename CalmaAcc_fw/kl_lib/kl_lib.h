@@ -126,6 +126,10 @@ static inline bool TimeElapsed(uint32_t *PSince, uint32_t Delay_ms) {
 static inline void ResetDelayVar(uint32_t *PSince) {
     *PSince = HAL_GetTick();
 }
+
+static inline void DelayLoop(volatile uint32_t Ticks) {
+    while(Ticks--);
+}
 #endif
 
 #if 0 // ============================== I2C ====================================

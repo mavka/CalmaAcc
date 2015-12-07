@@ -7,7 +7,6 @@
 
 #include <string.h>
 #include "uart.h"
-#include "main.h" // App_t
 #include "stm32f042x6.h"
 
 Uart_t Uart;

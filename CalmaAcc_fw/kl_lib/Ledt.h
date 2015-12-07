@@ -36,6 +36,7 @@ private:
     uint32_t IDelayVar = 0, IDelay = 0;
     uint32_t CurrBrt = 0, TargetBrt;
     uint32_t SmoothVar;
+    bool IEnabled;
     void Enable();
     void Disable();
     void InitPwm(uint8_t N);
@@ -45,7 +46,7 @@ public:
     void Set(const uint8_t AValue);
     uint8_t Inc();
     uint8_t Dec();
-    void Start(uint32_t ATargetBrt, uint32_t ASmoothVar);
+    void Start(uint32_t ATargetBrt, uint32_t ASmoothVar, bool AEnabled);
     State_t Task();
 };
 

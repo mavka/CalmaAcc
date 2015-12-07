@@ -35,15 +35,17 @@ void Led_t::Set(const uint8_t AValue) {
     for(uint8_t i=0; i<LED_CNT; i++) {
         *TMR_PCCR(LedCfg[i].PTimer, LedCfg[i].TmrChnl) = AValue;
     }
-    CurrBrt = AValue;
+//    CurrBrt = AValue;
 }
 
 uint8_t Led_t::Inc() {
     if(CurrBrt >= LED_TOP_VALUE) return 1;
     else {
         CurrBrt++;
-        for(uint8_t i=0; i<LED_CNT; i++) {
-            *TMR_PCCR(LedCfg[i].PTimer, LedCfg[i].TmrChnl) = CurrBrt;
+        if(IEnabled) {
+            for(uint8_t i=0; i<LED_CNT; i++) {
+                *TMR_PCCR(LedCfg[i].PTimer, LedCfg[i].TmrChnl) = CurrBrt;
+            }
         }
         return 0;
     }
@@ -52,8 +54,10 @@ uint8_t Led_t::Dec() {
     if(CurrBrt == 0) return 1;
     else {
         CurrBrt--;
-        for(uint8_t i=0; i<LED_CNT; i++) {
-            *TMR_PCCR(LedCfg[i].PTimer, LedCfg[i].TmrChnl) = CurrBrt;
+        if(IEnabled) {
+            for(uint8_t i=0; i<LED_CNT; i++) {
+                *TMR_PCCR(LedCfg[i].PTimer, LedCfg[i].TmrChnl) = CurrBrt;
+            }
         }
         return 0;
     }
@@ -102,9 +106,10 @@ void Led_t::InitPwm(uint8_t N) {
 }
 
 
-void Led_t::Start(uint32_t ATargetBrt, uint32_t ASmoothVar) {
+void Led_t::Start(uint32_t ATargetBrt, uint32_t ASmoothVar, bool AEnabled) {
     TargetBrt = ATargetBrt;
     SmoothVar = ASmoothVar;
+    IEnabled = AEnabled;
     ResetDelayVar(&IDelayVar);
     IDelay = ICalcDelay(CurrBrt, SmoothVar);
 }
