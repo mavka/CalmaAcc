@@ -146,7 +146,7 @@ void SwitchSeqChunk() {
 void SwitchMode() {
 //    Uart.PrintfNow("Switch\r");
     // Indicate mode change
-    for(int i = 0; i<9; i++) {
+    for(int i = 0; i<7; i++) {
         Led.Set(LED_TOP_VALUE);
         DelayLoop(BLINK_DELAY);
         Led.Set(0);
@@ -155,6 +155,7 @@ void SwitchMode() {
     if(Mode == moSteady) GoSleep();
     else Mode = (Mode_t)((int)Mode + 1);
     if(Mode == moSteady) Led.Set(LED_TOP_VALUE);
+    else if(Mode == moVibro) Led.Set(0);
     switch(Mode) {
         case moVibroBlink: Uart.PrintfNow("VibroBlink\r"); break;
         case moBlink: Uart.PrintfNow("Blink\r"); break;
