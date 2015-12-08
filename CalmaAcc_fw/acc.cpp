@@ -65,6 +65,13 @@ void SingleAcc_t::ReadAccelerations() {
     a[2] = Convert(BufR[4], BufR[5]);
 }
 
+void SingleAcc_t::EnterStandby() {
+    uint8_t BufW[2];
+    BufW[0] = ACC_REG_CONTROL1;
+    BufW[1] = 0x20; // Standby mode
+    i2c.WriteBuf(ACC_ADDR, BufW, 2);
+}
+
 // ================================== i2c_t ====================================
 void i2c_t::Init(GPIO_TypeDef *PGPIO, uint16_t AScl, uint16_t ASda) {
     // Copy init data

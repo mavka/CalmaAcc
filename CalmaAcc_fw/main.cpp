@@ -41,13 +41,15 @@
 
 #define ACC_POLL_PERIOD     27
 
-void SystemClock_Config();
-// Modes
-void SwitchMode();
-void Off();
+// ==== Prototypes ====
+static inline void GoSleep();
+static inline void SystemClock_Config();
+static inline void SwitchMode();
+static void SwitchSeqChunk();
 
-enum Mode_t {moVibroBlink=1, moBlink=2, moVibro=3, moSteady=4};
-Mode_t Mode = moVibroBlink;
+// ==== Types and vars ====
+enum Mode_t {moBlink=1, moVibroBlink=2, moVibro=3, moSteady=4};
+Mode_t Mode = moBlink;
 
 Led_t Led;
 Comparator_t Comparator;
@@ -55,15 +57,15 @@ Comparator_t Comparator;
 // Sequensor
 const Seq_t *PStart = Seq, *PCurr = Seq;
 uint32_t DelayVar = 0;
-void SwitchSeqChunk();
 
+// Vibro
 #define VibroOn()   PinSet(VIBRO_GPIO, VIBRO_PIN)
 #define VibroOff()  PinClear(VIBRO_GPIO, VIBRO_PIN)
 
 int main(void) {
     SystemClock_Config();
 
-    Uart.Init(115200, UART_GPIO, UART_TX_PIN);
+    Uart.Init(57600, UART_GPIO, UART_TX_PIN);
     Uart.PrintfNow("\rCalmaAcc\r");
 
     Led.Init();
@@ -150,7 +152,7 @@ void SwitchMode() {
         Led.Set(0);
         DelayLoop(BLINK_DELAY);
     }
-    if(Mode == moSteady) Off();
+    if(Mode == moSteady) GoSleep();
     else Mode = (Mode_t)((int)Mode + 1);
     if(Mode == moSteady) Led.Set(LED_TOP_VALUE);
     switch(Mode) {
@@ -161,8 +163,11 @@ void SwitchMode() {
     }
 }
 
-void Off() {
-    Mode = moVibroBlink;
+void GoSleep() {
+//    Mode = moVibroBlink;
+//    Sleep::EnableWakeupPin();
+    Acc.EnterStandby();
+    Sleep::EnterStandbyMode();
 }
 
 

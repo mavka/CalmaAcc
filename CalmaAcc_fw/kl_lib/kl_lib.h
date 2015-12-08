@@ -132,6 +132,24 @@ static inline void DelayLoop(volatile uint32_t Ticks) {
 }
 #endif
 
+namespace Sleep { // ===================== Sleep ===============================
+static inline void EnterStandbyMode() {
+    RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+    SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
+    PWR->CR = PWR_CR_PDDS;
+    PWR->CR |= PWR_CR_CWUF;
+    DelayLoop(4);
+    __WFI();
+}
+
+static inline void EnableWakeupPin()  { PWR->CSR |=  PWR_CSR_EWUP1; }
+static inline void DisableWakeupPin() { PWR->CSR &= ~PWR_CSR_EWUP1; }
+
+static inline bool WasInStandby() { return (PWR->CSR & PWR_CSR_SBF); }
+static inline void ClearStandbyFlag() { PWR->CR |= PWR_CR_CSBF; }
+}; // namespace
+
+
 #if 0 // ============================== I2C ====================================
 #define I2C_KL  TRUE
 

@@ -12,7 +12,7 @@
 
 enum Result_t {rsltNone, rsltDetected};
 
-#define COMP_TIMEOUT    2007
+#define COMP_TIMEOUT    3006
 
 class Comparator_t {
 private:

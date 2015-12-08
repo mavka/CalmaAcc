@@ -44,7 +44,7 @@ static const Seq_t Seq[] = {
 };
 
 // ================================= Setup =====================================
-#define ACC_TOLERANCE   5400
+#define ACC_TOLERANCE   7200
 #define ACC_G           504
 
 struct AccSeq_t {

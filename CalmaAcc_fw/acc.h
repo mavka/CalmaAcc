@@ -56,6 +56,7 @@ public:
     }
     void Init();
     void ReadAccelerations();
+    void EnterStandby();
 };
 
 #define ACC_CNT     6
