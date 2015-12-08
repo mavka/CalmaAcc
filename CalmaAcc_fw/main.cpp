@@ -154,7 +154,10 @@ void SwitchMode() {
     }
     if(Mode == moSteady) GoSleep();
     else Mode = (Mode_t)((int)Mode + 1);
-    if(Mode == moSteady) Led.Set(LED_TOP_VALUE);
+    if(Mode == moSteady) {
+        Led.Set(LED_TOP_VALUE);
+        VibroOff();
+    }
     else if(Mode == moVibro) Led.Set(0);
     switch(Mode) {
         case moVibroBlink: Uart.PrintfNow("VibroBlink\r"); break;
